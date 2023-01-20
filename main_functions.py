@@ -123,6 +123,7 @@ def data_main(last_GW=-1):
 
 
 ##############################################################################################
+# This is the main function for making changes to your team
 async def team_main(email, password , team_id):
     
     # Load the ML predictions and reduce the scores of injured players etc
