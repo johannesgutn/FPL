@@ -9,12 +9,13 @@ except ImportError:
 import numpy as np
 from pathlib import Path
 
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.layers import Dropout
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import EarlyStopping
-from tensorflow.keras.layers import BatchNormalization
+
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import Dropout
+from keras.optimizers import Adam
+from keras.callbacks import EarlyStopping
+from keras.layers import BatchNormalization
 
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split

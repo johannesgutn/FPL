@@ -77,7 +77,8 @@ def data_main(last_GW=-1):
         total_data.index = range(len(total_data))
         total_data.to_csv(f'ml_data/total_data_{season}_{last_GW}.csv', index = False)
         total_data.to_csv('ml_data/total_data.csv', index = False)
-        os.remove(f'ml_data/total_data_{season}_{last_GW-1}.csv')
+        if os.path.isfile(f'raw_data/player_data_{season}_{last_GW}.csv'):
+            os.remove(f'raw_data/player_data_{season}_{last_GW}.csv')
     else: 
         os.rename(f'ml_data/total_data_{season}_{last_GW-1}.csv',f'ml_data/total_data_{season}_{last_GW}.csv')
         total_data_old = pd.read_csv(f'ml_data/total_data_{last_season}_{38}.csv')

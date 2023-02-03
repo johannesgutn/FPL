@@ -424,6 +424,7 @@ def train_neural():
         factor = factor * factor
     model.add(Dense(1,))
     model.compile(Adam(lr=learn_rate), 'mean_squared_error')
+    #model.compile(optimizer= "adam", loss='mse')
 
     # Pass several parameters to 'EarlyStopping' function and assigns it to 'earlystopper'
     earlystopper = EarlyStopping(monitor='val_loss', min_delta=0, patience=patience_, verbose=1, mode='auto')

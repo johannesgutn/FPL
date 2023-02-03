@@ -1,7 +1,7 @@
 from main_functions import *
 
 # Check whether the newest data has already been downloaded.  If not it downloads it
-if not os.path.isfile(f'raw_data/raw_data_{season}_{last_GW}.csv'):
+if not os.path.isfile(f'player_data/player_data_{season}_{last_GW}.csv'):
     data_main()
 
 
