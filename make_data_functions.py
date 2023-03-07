@@ -14,8 +14,8 @@ def edit_fixture(GW):
     df1 = df[df.event == GW]
     df_a = df1[['event','team_a', 'team_a_difficulty','team_a_score','team_h_score','team_h']]
     df_h = df1[['event','team_h', 'team_h_difficulty','team_h_score','team_a_score','team_a']]
-    df_a['is_home']=0
-    df_h['is_home']=1
+    df_a.loc[:,'is_home']=0
+    df_h.loc[:,'is_home']=1
     df_a.columns = ['event','team', 'fixture_difficulty','GS','GA','opponent','is_home']
     df_h.columns = ['event','team', 'fixture_difficulty','GS','GA','opponent','is_home']
     frames = [df_a,df_h]
@@ -46,6 +46,11 @@ def goal_diff(df,fixtures,GW,DGW_teams,BGW_teams):
     #Opens old fixture stuff
     goal_diff = pd.read_csv(f'goal_difference/goal_difference_{season}_{GW-1}.csv')
 
+    # Updating games played, takes into account DGW/BGW
+    teams = list(fixtures['team'])
+    for team in range(1,21):
+        goal_diff.loc[team-1,['games_played']]=goal_diff.loc[team-1,['games_played']]+teams.count(team)
+
     #DGW stuff.
     if len(DGW_teams)>0:
         print('Last: DGW')
@@ -75,11 +80,6 @@ def goal_diff(df,fixtures,GW,DGW_teams,BGW_teams):
     goal_diff['GS_tot']=goal_diff['GS_tot'] + fixtures['GS']
     goal_diff['GA_tot']=goal_diff['GA_tot'] + fixtures['GA']
 
-    # DGW/BGW: Updating games played, and adding/subtracting matches for DGW/BGW teams
-    teams = list(fixtures['team'])
-    for team in range(1,21):
-        goal_diff.loc[team-1,['games_played']]=goal_diff.loc[team-1,['games_played']]+teams.count(team)
-        
     '''for index, row in goal_diff.iterrows():
         row['games_played']=row['games_played']+teams.count(row['team'])
         print(row['team'])
@@ -260,13 +260,15 @@ def add_opponent_data(GW,new_data,gd):
         # Make new_data of players with DGW
         new_data_dgw1 = pd.DataFrame()
         for team in DGW_teams:
-            new_data_dgw1=new_data_dgw1.append(new_data[new_data.team == team])
+            #new_data_dgw1=new_data_dgw1.append(new_data[new_data.team == team])
+            new_data_dgw1=pd.concat([new_data_dgw1,new_data[new_data.team == team]])
             new_data = new_data[new_data.team != team]
         new_data_dgw2 = new_data_dgw1.copy()
         fix_dgw = pd.DataFrame()
         # Get the double fixtures
         for team in DGW_teams:
-            fix_dgw=fix_dgw.append(fix[fix.team == team])
+            #fix_dgw=fix_dgw.append(fix[fix.team == team])
+            fix_dgw=pd.concat([fix_dgw,fix[fix.team == team]])
         fix_dgw1=fix_dgw.iloc[::2]
         fix_dgw2=fix_dgw.iloc[1::2]
         # Set in fixture diff, opponent and is_home and merge them all together in the end
@@ -387,90 +389,3 @@ def new_season(df):
     
     
     df.to_csv(f'goal_difference/goal_difference_{season}_0.csv', index = False)
-    
-
-
-
-
-def train_neural():
-    # Load the training data
-    df = pd.read_csv('ml_data/total_data.csv')
-
-
-
-    df1 = df.drop("next_points", axis=1)
-    df2 = df["next_points"].copy()
-    X_train, X_test, y_train, y_test = train_test_split(df1, df2, test_size=0.2)
-    X_train = preprocessing.scale(X_train)
-    X_test = preprocessing.scale(X_test)
-    
-    # Now do the fitting
-    num_rows, num_cols = X_train.shape
-    n_inputs = num_cols
-    
-    n_inputs = len(X_train[0])
-
-    factor = factor_
-    model = Sequential()
-    model.add(Dense(n_neurons, input_shape=(n_inputs,), activation='relu'))
-    if batch_norm:
-        model.add(BatchNormalization())
-    model.add(Dropout(drop_rate))
-    for i in range(n_layers-1):
-        model.add(Dense(round(n_neurons*factor), activation='relu'))
-        if batch_norm:
-            model.add(BatchNormalization())
-        model.add(Dropout(drop_rate))
-        factor = factor * factor
-    model.add(Dense(1,))
-    model.compile(Adam(lr=learn_rate), 'mean_squared_error')
-    #model.compile(optimizer= "adam", loss='mse')
-
-    # Pass several parameters to 'EarlyStopping' function and assigns it to 'earlystopper'
-    earlystopper = EarlyStopping(monitor='val_loss', min_delta=0, patience=patience_, verbose=1, mode='auto')
-
-    # Fits model over 2000 iterations with 'earlystopper' callback, and assigns it to history
-    history = model.fit(X_train, y_train, epochs = 2000, validation_split = 0.2,shuffle = True, verbose = 0, 
-                        callbacks = [earlystopper])
-    
-    # Runs model with its current weights on the training and testing data
-    y_train_pred = model.predict(X_train)
-    y_test_pred = model.predict(X_test)
-
-    # Calculates and prints rmse score of training and testing data
-    print("The RMSE score on the Train set is:\t{:0.3f}".format(np.sqrt(mean_squared_error(y_train, y_train_pred))))
-    print("The RMSE score on the Test set is:\t{:0.3f}".format(np.sqrt(mean_squared_error(y_test, y_test_pred))))
-    
-    return model
-
-
-# Take the current data and change the opponent data to match the fixtures in the specific GW
-# Then do the predictions based on the model
-def predict(model,player_data,data_columns):
-
-    X_predict = player_data[data_columns]
-    X_predict = preprocessing.scale(X_predict)
-    
-    y_predict = model.predict(X_predict)
-    
-    player_data['X_points'] = y_predict
-    
-    # Add expected points for the two DGW matches
-    if len(player_data[player_data['id'].duplicated(keep='last')])>0:
-        player_data = player_data.sort_values('id', ascending=False)
-        dgw1 = player_data[player_data['id'].duplicated(keep='last')]
-        dgw2 = player_data[player_data['id'].duplicated(keep='first')]
-        player_data = player_data.drop_duplicates(subset='id', keep=False)
-        dgw1.set_index('id',inplace = True)
-        dgw2.set_index('id',inplace = True)
-        dgw1['X_points'] = round(dgw1['X_points'] + dgw2['X_points'],2)
-        dgw1.reset_index(inplace=True)
-        player_data = player_data.append(dgw1)
-        player_data = player_data.sort_values('X_points', ascending=False)
-        player_data.reset_index(inplace=True)
-
-    # Set BGW players' points to 0
-    player_data['X_points'] = round(player_data.apply(lambda row: row[['X_points']]*0 if row['fixture_difficulty'] == 0
-     else row[['X_points']], axis=1),2)
-
-    return player_data

@@ -4,5 +4,4 @@ This code does two things:
 
 To run it simply use run.py, but with your team's credentials. 
 
-It requires the following packages: pandas, json,requests, numpy, pathlib, keras, sklearn, fpl, aiohttp, asyncio
-
+It requires the packages in requirements.txt

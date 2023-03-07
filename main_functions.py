@@ -1,7 +1,9 @@
 from make_data_functions import *
-from ml_team_fuctions import *
+from ml_functions import *
+from team_fuctions import *
 
-# This is the main function for the part that gathers data and does the machine learning
+
+# This is the main function for the part that gathers data and makes it ready for machine learning
 def data_main(last_GW=-1):
     # Import latest player data as a json
     get_json('json/fpl_events.json', 'https://fantasy.premierleague.com/api/bootstrap-static/')
@@ -47,9 +49,9 @@ def data_main(last_GW=-1):
     
     # Update the new data to include all the additional stats
     new_data = update_new_data(last_GW,raw_data,old_data)
-    new_data_bare = new_data.copy() # Save this because we need it to do ML for later GWs
-    new_data = add_opponent_data(last_GW+1,new_data,goal_difference)
+    new_data.to_csv(f'player_data/player_data.csv', index = False) # Save this because we need it to do ML for later GWs
     
+    new_data = add_opponent_data(last_GW+1,new_data,goal_difference)
     
     player_type_columns = ['element_type','defender','attacker']
     season_long_columns = ['points_per_game','ict_index_pg','influence_pg','creativity_pg','threat_pg','bps_pg']
@@ -71,23 +73,31 @@ def data_main(last_GW=-1):
     # Add it to the old data to get machine learning data
     if last_GW > 6:
         #total_data_old = pd.read_csv(f'ml_data/total_data_{season}_{last_GW-1}.csv')
-        total_data_old = pd.read_csv(f'ml_data/total_data.csv')
+        total_data_old = pd.read_csv('ml_data/total_data.csv')
         frames = [ml_data, total_data_old]
         total_data = pd.concat(frames)
         total_data.index = range(len(total_data))
         total_data.to_csv(f'ml_data/total_data_{season}_{last_GW}.csv', index = False)
         total_data.to_csv('ml_data/total_data.csv', index = False)
-        if os.path.isfile(f'raw_data/player_data_{season}_{last_GW}.csv'):
-            os.remove(f'raw_data/player_data_{season}_{last_GW}.csv')
+        if os.path.isfile(f'ml_data/total_data_{season}_{last_GW-2}.csv'):
+            os.remove(f'ml_data/total_data_{season}_{last_GW-2}.csv')
     else: 
         os.rename(f'ml_data/total_data_{season}_{last_GW-1}.csv',f'ml_data/total_data_{season}_{last_GW}.csv')
         total_data_old = pd.read_csv(f'ml_data/total_data_{last_season}_{38}.csv')
         total_data_old.to_csv(f'ml_data/total_data_{season}_{last_GW}.csv', index = False)
         
-    
-    # Now we use this to make predictions about the next x GWs
-    # We ran one of these operations before, which is annoying
+# This is the function that trains a neural network and does the predictions
+def ml_main():    
     model = train_neural()
+
+    total_data = pd.read_csv('ml_data/total_data.csv')
+    goal_difference = pd.read_csv(f'goal_difference/goal_difference_{season}_{last_GW}.csv')
+    new_data_bare = pd.read_csv(f'player_data/player_data.csv')
+    new_data = add_opponent_data(last_GW,new_data_bare,goal_difference)
+
+    data_columns = list(total_data.columns)
+
+    
     x=5
     predicted_list=[]
     data_columns.remove('next_points')
@@ -96,7 +106,7 @@ def data_main(last_GW=-1):
         future_data = predict(model,future_data,data_columns)
         
         future_data_= future_data[['web_name','opponent']+data_columns]
-        future_data_.to_csv(f'player_data/future_data_{season}_{last_GW+i}.csv', index = False)
+        #future_data_.to_csv(f'player_data/future_data_{season}_{last_GW+i}.csv', index = False)
         
         new_data=insert(new_data,f'predicted_points_{last_GW+i}','id',future_data,'X_points','id')
         new_data=insert(new_data,f'opponent_{last_GW+i}','id',future_data,'opponent','id')
@@ -106,7 +116,7 @@ def data_main(last_GW=-1):
         predicted_list.append(f'opponent_{last_GW+i}')
         predicted_list.append(f'predicted_points_{last_GW+i}')
         
-    new_data['predicted_points_mean'] = round(new_data[predicted_list].sum(axis=1)/x,2)
+    new_data['predicted_points_mean'] = round(new_data[predicted_list].sum(axis=1,numeric_only=True)/x,2)
     all_columns = list(new_data.columns)
 
     column_list = ['web_name']+predicted_list+['predicted_points_mean','points_per_game','form']
@@ -119,9 +129,9 @@ def data_main(last_GW=-1):
     
     new_data=new_data.drop_duplicates(subset='id', keep='last')
     
+
     new_data.to_csv('player_data/player_data.csv', index = False)
     new_data.to_csv(f'player_data/player_data_{season}_{last_GW}.csv', index = False)
-
 
 ##############################################################################################
 # This is the main function for making changes to your team

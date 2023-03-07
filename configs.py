@@ -1,4 +1,5 @@
 import pandas as pd
+pd.options.mode.chained_assignment = None
 import json
 import requests
 import os
@@ -16,6 +17,8 @@ from keras.layers import Dropout
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 from keras.layers import BatchNormalization
+from keras.models import load_model
+
 
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
