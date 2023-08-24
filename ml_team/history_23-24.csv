@@ -1,0 +1,4 @@
+event,bank,event_transfers,event_transfers_cost,overall_rank,points_on_bench,rank,rank_sort,total_points,value,points,predicted_points,points - predicted_points
+1,0,0,0,572579,10,572579,658882,81,1000,81,0.0,0
+2,0,0,0,1415203,6,4202702,4268849,126,1003,45,0.0,45
+3,0,0,0,0,0,0,0,0,0,0,65.93,0

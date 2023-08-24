@@ -1,4 +1,5 @@
 from configs import *
+from credentials import cookie
 
 # These are from the team stuff
 
@@ -25,7 +26,7 @@ def reduce_predictions(pred):
 async def get_team(email,password,team_id):
     async with aiohttp.ClientSession() as session:
         fpl = FPL(session)
-        await fpl.login(email, password)
+        await fpl.login(email, password,cookie=cookie)
         user = await fpl.get_user(team_id)
         team_ = await user.get_team()
         transfer_status_ = await user.get_transfers_status()
@@ -147,11 +148,11 @@ class Team:
             transfer = pd.DataFrame(columns=['player','points','replacement','rep_points','points_gained'], dtype=object)
         else:
             maketransf = True
-                        
-        worst_XI_nr=1
+
+        #worst_XI_nr=1
         if maketransf:
             if free_transf == 2 and worst_XI_nr >= 2:
-                print("2 normal transfer")
+                print("2 normal transfers")
                 transfer = self.two_transf(df_predictions,low_price,high_price)
             elif free_transf == 2 and worst_XI_nr == 1 and worst_bench_nr > 2:
                 print("1 norm transf 1 bench transfer")

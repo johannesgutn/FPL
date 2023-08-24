@@ -1,7 +1,8 @@
 from configs import *
 
 def train_neural():
-    if not os.path.isfile(f'neural_net_{season}_{last_GW-1}.h5'):
+    #if not os.path.isfile(f'neural_net_{season}_{last_GW-1}.h5'):
+    if True:
         # If there is no existing ml model we make it from scratch
         # Load the training data
         df = pd.read_csv('ml_data/total_data.csv')

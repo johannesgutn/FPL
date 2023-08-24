@@ -4,16 +4,12 @@ from team_fuctions import *
 
 
 # This is the main function for the part that gathers data and makes it ready for machine learning
-def data_main(last_GW=-1):
+def data_main(last_GW=last_GW):
     # Import latest player data as a json
     get_json('json/fpl_events.json', 'https://fantasy.premierleague.com/api/bootstrap-static/')
     # Open the json file
     with open('json/fpl_events.json') as json_data:
         d = json.load(json_data)
-    
-    # Get last GW if we don't specify a value for it
-    if last_GW < 0:
-        last_GW = get_latest_GW(d)
     
     # Get new raw_data
     if os.path.isfile(f'raw_data/raw_data_{season}_{last_GW}.csv'):
@@ -87,7 +83,7 @@ def data_main(last_GW=-1):
         total_data_old.to_csv(f'ml_data/total_data_{season}_{last_GW}.csv', index = False)
         
 # This is the function that trains a neural network and does the predictions
-def ml_main():    
+def ml_main(last_GW=last_GW):    
     model = train_neural()
 
     total_data = pd.read_csv('ml_data/total_data.csv')
@@ -135,7 +131,7 @@ def ml_main():
 
 ##############################################################################################
 # This is the main function for making changes to your team
-async def team_main(email, password , team_id):
+async def team_main(email, password , team_id, last_GW=last_GW):
     
     # Load the ML predictions and reduce the scores of injured players etc
     df_predictions = pd.read_csv(f'player_data/player_data_{season}_{last_GW}.csv')

@@ -14,8 +14,10 @@ def edit_fixture(GW):
     df1 = df[df.event == GW]
     df_a = df1[['event','team_a', 'team_a_difficulty','team_a_score','team_h_score','team_h']]
     df_h = df1[['event','team_h', 'team_h_difficulty','team_h_score','team_a_score','team_a']]
-    df_a.loc[:,'is_home']=0
-    df_h.loc[:,'is_home']=1
+    #df_a.loc[:,'is_home']=0
+    #df_h.loc[:,'is_home']=1
+    df_a['is_home']=0
+    df_h['is_home']=1
     df_a.columns = ['event','team', 'fixture_difficulty','GS','GA','opponent','is_home']
     df_h.columns = ['event','team', 'fixture_difficulty','GS','GA','opponent','is_home']
     frames = [df_a,df_h]
@@ -387,5 +389,8 @@ def new_season(df):
     insert(df, 'team_name', 'team', teams, 'short_name', 'id')
     
     
-    
     df.to_csv(f'goal_difference/goal_difference_{season}_0.csv', index = False)
+
+    # Also make total data
+    total_data_old = pd.read_csv(f'ml_data/total_data_{last_season}_{38}.csv')
+    total_data_old.to_csv(f'ml_data/total_data_{season}_0.csv', index = False)
