@@ -78,13 +78,15 @@ def data_main(last_GW=last_GW):
         if os.path.isfile(f'ml_data/total_data_{season}_{last_GW-2}.csv'):
             os.remove(f'ml_data/total_data_{season}_{last_GW-2}.csv')
     else: 
-        os.rename(f'ml_data/total_data_{season}_{last_GW-1}.csv',f'ml_data/total_data_{season}_{last_GW}.csv')
-        total_data_old = pd.read_csv(f'ml_data/total_data_{last_season}_{38}.csv')
+        total_data_old = pd.read_csv(f'ml_data/total_data.csv')
         total_data_old.to_csv(f'ml_data/total_data_{season}_{last_GW}.csv', index = False)
+        if os.path.isfile(f'ml_data/total_data_{season}_{last_GW-2}.csv'):
+            os.remove(f'ml_data/total_data_{season}_{last_GW-2}.csv')
         
 # This is the function that trains a neural network and does the predictions
 def ml_main(last_GW=last_GW):    
-    model = train_neural()
+    #model = train_neural()
+    model = train_model()
 
     total_data = pd.read_csv('ml_data/total_data.csv')
     goal_difference = pd.read_csv(f'goal_difference/goal_difference_{season}_{last_GW}.csv')

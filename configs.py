@@ -10,21 +10,6 @@ except ImportError:
 import numpy as np
 from pathlib import Path
 
-
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import Dropout
-from keras.optimizers import Adam
-from keras.callbacks import EarlyStopping
-from keras.layers import BatchNormalization
-from keras.models import load_model
-
-
-from sklearn import preprocessing
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score
-from sklearn.metrics import mean_squared_error
-
 from fpl import FPL
 import aiohttp
 import asyncio
