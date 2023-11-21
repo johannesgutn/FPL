@@ -2,5 +2,9 @@
 .ipynb_checkpoints/
 __pycache__/
 json/
+.DS_Store
+.ipynb
 
 credentials.py
+
+*.csv
