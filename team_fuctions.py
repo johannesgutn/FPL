@@ -3,23 +3,23 @@ from credentials import cookie
 
 # These are from the team stuff
 
-def reduce_predictions(pred):
+def reduce_predictions(df):
     for i in f'{next_GW}','mean':
-        pred['predicted_points_'+i+'_raw']=pred['predicted_points_'+i]
-        pred['predicted_points_'+i] = round(pred['predicted_points_'+i]*pred['chance_of_playing_next_round']/100,2)
-        pred['predicted_points_'+i] = round(pred.apply(lambda row: row[['predicted_points_'+i]]*row['nail']/0.85 if row['nail'] < 0.8 and row['nail_last5'] < 0.8
+        df['predicted_points_'+i+'_raw']=df['predicted_points_'+i]
+        df['predicted_points_'+i] = round(df['predicted_points_'+i]*df['chance_of_playing_next_round']/100,2)
+        df['predicted_points_'+i] = round(df.apply(lambda row: row[['predicted_points_'+i]]*row['nail']/0.8 if row['nail'] < 0.8
          else row[['predicted_points_'+i]], axis=1),2)
-        pred['predicted_points_'+i]=pred.apply(lambda row: row[['predicted_points_'+i]]*row['form'] if row['form'] < 1 
+        df['predicted_points_'+i]=df.apply(lambda row: row[['predicted_points_'+i]]*row['form'] if row['form'] < 1 
          else row[['predicted_points_'+i]], axis=1)
-        if next_GW > 6:
-            pred['predicted_points_'+i]=pred.apply(lambda row: row[['predicted_points_'+i]]*row['games_played_last5']/3 if row['games_played_last5'] < 3 
+        if next_GW > 8:
+            df['predicted_points_'+i]=df.apply(lambda row: row[['predicted_points_'+i]]*row['games_played_last5']/3 if row['games_played_last5'] < 3 
              else row[['predicted_points_'+i]], axis=1)
-            pred['predicted_points_'+i]= round(pred.apply(lambda row: row[['predicted_points_'+i]]*row['minutes_pg_last5']/20 if row['minutes_pg_last5'] < 20 
+            df['predicted_points_'+i]= round(df.apply(lambda row: row[['predicted_points_'+i]]*row['minutes_pg_last5']/20 if row['minutes_pg_last5'] < 20 
              else row[['predicted_points_'+i]], axis=1),2)
     
-    pred = pred.sort_values('predicted_points_mean', ascending=False)
+    df = df.sort_values('predicted_points_mean', ascending=False)
     
-    return pred
+    return df
 
 
 
@@ -142,7 +142,7 @@ class Team:
         free_transf = self.free_transf
         # This logic decides what to do
         # It returns a df with columns 'player','points','replacement','rep_points','points_gained'
-        if last_GW == 1 and injured_XI_nr == 0:
+        if free_transf == 1 and injured_XI_nr == 0:
             maketransf = False
             print('Save a transfer')
             transfer = pd.DataFrame(columns=['player','points','replacement','rep_points','points_gained'], dtype=object)
@@ -319,6 +319,10 @@ class Team:
         else:
             transfer = change1.head(1)
         return transfer
+    
+
+  
+
 
     def two_transf(self,df_predictions,low_price,high_price):
         team = self.team_XI.copy()
@@ -436,3 +440,4 @@ class Team:
         transfer['points_gained']=transfer.rep_predicted_points_mean-transfer.predicted_points_mean
         transfer.index=range(len(transfer))
         return transfer    
+    
