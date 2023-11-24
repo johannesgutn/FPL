@@ -1,4 +1,5 @@
-from main_functions import *
+import asyncio
+from main_functions import data_main, ml_main, team_main
 from credentials import email, password, team_id
 
 # Gather data and perform machine learning 

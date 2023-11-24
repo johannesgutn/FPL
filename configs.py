@@ -50,18 +50,18 @@ def insert(df_to, col_to, col_match_to, df_from, col_from, col_match_from):
     
     return df_to
 
+# Import latest player data as a json
+get_json('json/fpl_events.json', 'https://fantasy.premierleague.com/api/bootstrap-static/')
+# Open the json file
+with open('json/fpl_events.json') as json_data:
+    d = json.load(json_data)
+
 # Not an ideal structure to have some random variables in the middle of the list of functions
 # Making global variables
 user = os.getlogin()
 wdir=f'/Users/johannes/Library/CloudStorage/Dropbox/ml/FPL/'
 season = get_season()
 last_season = f'{int(season[0:2])-1}-{int(season[0:2])}'
-
-# Import latest player data as a json
-get_json('json/fpl_events.json', 'https://fantasy.premierleague.com/api/bootstrap-static/')
-# Open the json file
-with open('json/fpl_events.json') as json_data:
-    d = json.load(json_data)
 
 # Get last GW if we don't specify a value for it
 last_GW = get_latest_GW(d)

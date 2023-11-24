@@ -2,6 +2,7 @@
 .ipynb_checkpoints/
 __pycache__/
 json/
+.venv/
 .DS_Store
 .ipynb
 
